@@ -13,7 +13,9 @@ int main()
     InputHandler handler;
     Context c;
 
-    Container container({std::make_unique<Text>("Hiii")});
+    auto container = Container::create()
+                         .add_widget(std::make_shared<Text>("HI"))
+                         .add_widget(std::make_shared<Text>("TEST"));
 
     container.draw(c);
 

@@ -10,7 +10,16 @@ namespace emgf
 class Container : public Widget
 {
 public:
-    Container(std::initializer_list<std::shared_ptr<Widget>> w) : widgets(w) {}
+    static Container create()
+    {
+        return Container();
+    }
+    Container() {}
+    Container &add_widget(std::shared_ptr<Widget> &&w)
+    {
+        widgets.push_back(w);
+        return *this;
+    }
     void draw(Context c)
     {
         for (auto &w : widgets)
