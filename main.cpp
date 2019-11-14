@@ -20,7 +20,8 @@ int main()
     p._header = "Hi";
 
     Column col;
-    col._entries = {"First", "Second"};
+    col.position.down();
+    col._entries = {"First", "Second", "Third"};
 
     p._columns.push_back(col);
 

@@ -4,6 +4,8 @@
 #include <memory>
 
 #include "widget.hpp"
+#include "position.hpp"
+#include "console_commands.hpp"
 
 namespace emgf
 {
@@ -31,12 +33,15 @@ class Column
 public:
     void draw_to(Context &c)
     {
+        auto temp_pos = position;
         for (auto &s : _entries)
         {
-            c << s << "\n";
+            c << c_cmd::set_cursor(temp_pos)
+              << s;
+            temp_pos.down();
         }
     }
-
+    Position position;
     std::vector<std::string> _entries;
     int highlited = 0;
 };
@@ -47,6 +52,7 @@ public:
     Page() {}
     void draw_to(Context &c)
     {
+        c << c_cmd::clear;
         _header.draw_to(c);
         for (auto &col : _columns)
         {

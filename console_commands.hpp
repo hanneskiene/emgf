@@ -1,3 +1,8 @@
+#pragma once
+
+#include <sstream>
+#include "position.hpp"
+
 namespace emgf
 {
 namespace c_cmd
@@ -38,11 +43,27 @@ constexpr auto bright_cyan = "\u001b[96m";
 } // namespace foreground
 } // namespace color
 
-auto set_cursor(int x, int y)
+auto set_cursor(Position p)
 {
     std::ostringstream oss;
-    oss << "\x1b[" << x + 1 << ";" << y + 1 << "H";
+    oss << "\x1b[" << p.x + 1 << ";" << p.y + 1 << "H";
     return oss.str();
 }
+
+enum class Direction : char
+{
+    up = 'A',
+    down = 'B',
+    right = 'c',
+    left = 'D'
+};
+
+auto move_cursor(Direction d, int x = 1)
+{
+    std::ostringstream oss;
+    oss << "\033[" << x << static_cast<char>(d);
+    return oss.str();
+}
+
 } // namespace c_cmd
 } // namespace emgf
