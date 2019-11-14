@@ -11,6 +11,8 @@ namespace emgf
 class Context
 {
 public:
+    Context() {}
+    Context(Context const &c) = delete;
     Size size;
     Position pos;
     Context &operator<<(std::string s)

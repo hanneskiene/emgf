@@ -7,5 +7,5 @@ all: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(EXEC) $(OBJECTS)
 clean:
 	rm $(EXEC)
-	rm src/*.o
+	rm *.o
 fresh: clean all

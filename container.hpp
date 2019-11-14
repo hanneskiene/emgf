@@ -15,19 +15,34 @@ public:
         return Container();
     }
     Container() {}
-    Container &add_widget(std::shared_ptr<Widget> &&w)
+    Container(Container const &c)
     {
-        widgets.push_back(w);
+        for (auto const &w : c.widgets)
+        {
+            widgets.push_back(w->copy());
+        }
+    }
+
+    Container &add_widget(std::unique_ptr<Widget> w)
+    {
+        widgets.push_back(std::move(w));
         return *this;
     }
-    void draw(Context c)
+
+    void draw(Context &c) override
     {
-        for (auto &w : widgets)
+        for (auto const &w : widgets)
         {
             w->draw(c);
         }
     }
-    std::vector<std::shared_ptr<Widget>> widgets;
+
+    virtual std::unique_ptr<Widget> copy() override
+    {
+        return std::make_unique<Container>(*this);
+    }
+
+    std::vector<std::unique_ptr<Widget>> widgets;
 };
 
 } // namespace emgf

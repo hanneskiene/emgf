@@ -9,21 +9,16 @@
 
 namespace emgf
 {
-class Widget
+class Colored
 {
-public:
-    Widget() {}
-    Widget(ForegroundColor fgc) : _has_fgc(true),
-                                  _fgc(fgc) {}
-    Widget(BackgroundColor bgc) : _has_bgc(true),
-                                  _bgc(bgc) {}
-    Widget(ForegroundColor fgc, BackgroundColor bgc) : _has_fgc(true),
-                                                       _fgc(fgc),
-                                                       _has_bgc(true),
-                                                       _bgc(bgc) {}
-
-    virtual void draw(Context &c) {}
-
+    Colored(ForegroundColor fgc) : _has_fgc(true),
+                                   _fgc(fgc) {}
+    Colored(BackgroundColor bgc) : _has_bgc(true),
+                                   _bgc(bgc) {}
+    Colored(ForegroundColor fgc, BackgroundColor bgc) : _has_fgc(true),
+                                                        _fgc(fgc),
+                                                        _has_bgc(true),
+                                                        _bgc(bgc) {}
     void start_color(Context &c)
     {
         if (_has_fgc)
@@ -43,28 +38,48 @@ public:
             c << _fgc.stop();
         }
     }
-
     bool _has_fgc = false;
     ForegroundColor _fgc;
     bool _has_bgc = false;
     BackgroundColor _bgc;
 };
 
+class Widget
+{
+public:
+    /*Widget() = 0;
+    Widget(Widget const &w) = 0; 
+    {
+        static_cast<void>(w);
+    }*/
+
+    virtual void draw(Context &c) = 0;          /*
+    {
+        static_cast<void>(c);
+    }*/
+    virtual std::unique_ptr<Widget> copy() = 0; /*
+    {
+        return std::make_unique<Widget>(*this);
+    }*/
+};
+
 class Text : public Widget
 {
 public:
     Text(std::string t) : _text(t) {}
-    Text(std::string t, ForegroundColor fgc) : Widget(fgc), _text(t) {}
-    Text(std::string t, BackgroundColor bgc) : Widget(bgc), _text(t) {}
-    Text(std::string t, ForegroundColor fgc, BackgroundColor bgc) : Widget(fgc, bgc), _text(t) {}
+    Text(Text const &t) : _text(t._text) {}
 
     void draw(Context &c)
     {
-        start_color(c);
         c << _text;
-        stop_color(c);
+    }
+
+    virtual std::unique_ptr<Widget> copy()
+    {
+        return std::make_unique<Text>(*this);
     }
 
     std::string _text;
 };
+
 } // namespace emgf
