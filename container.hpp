@@ -7,27 +7,57 @@
 
 namespace emgf
 {
-class Container : public Drawable
+
+class Line
 {
 public:
-    Container() {}
-    Container(std::vector<Widget> w) : widgets(w) {}
-
-    Container &add_widget(Widget w)
+    Line() : _text("") {}
+    Line &operator=(std::string s)
     {
-        widgets.push_back(std::move(w));
+        _text = s;
         return *this;
     }
-
-    void draw(Context &c) override
+    Line(std::string s) : _text(s) {}
+    void draw_to(Context &c)
     {
-        for (auto &w : widgets)
+        c << _text;
+    }
+
+    std::string _text;
+};
+
+class Column
+{
+public:
+    void draw_to(Context &c)
+    {
+        for (auto &s : _entries)
         {
-            w.draw(c);
+            c << s << "\n";
         }
     }
 
-    std::vector<Widget> widgets;
+    std::vector<std::string> _entries;
+    int highlited = 0;
+};
+
+class Page
+{
+public:
+    Page() {}
+    void draw_to(Context &c)
+    {
+        _header.draw_to(c);
+        for (auto &col : _columns)
+        {
+            col.draw_to(c);
+        }
+        _footer.draw_to(c);
+    }
+
+    Line _header;
+    std::vector<Column> _columns;
+    Line _footer;
 };
 
 } // namespace emgf

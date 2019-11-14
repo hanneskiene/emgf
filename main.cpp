@@ -16,11 +16,16 @@ int main()
     InputHandler handler;
     Context c;
 
-    Widget w(
-        std::make_unique<Container>(
-            std::vector<Widget>{Widget(std::make_unique<Text>("HIII"))}));
+    Page p;
+    p._header = "Hi";
 
-    w.draw(c);
+    Column col;
+    col._entries = {"First", "Second"};
+
+    p._columns.push_back(col);
+
+    p.draw_to(c);
+    c.flush();
 
     handler.loop_until('q');
 

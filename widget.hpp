@@ -44,36 +44,13 @@ class Colored
     BackgroundColor _bgc;
 };
 
-class Drawable
-{
-public:
-    virtual void draw(Context &c) = 0;
-};
-
-class Widget : public Drawable
-{
-public:
-    Widget() {}
-    Widget(std::unique_ptr<Drawable> d) : _content(std::move(d)) {}
-    void draw(Context &c) override
-    {
-        if (_content)
-        {
-            _content->draw(c);
-        }
-    }
-
-private:
-    std::unique_ptr<Drawable> _content;
-};
-
-class Text : public Drawable
+class Text
 {
 public:
     Text(std::string t) : _text(t) {}
     Text(Text const &t) : _text(t._text) {}
 
-    void draw(Context &c) override
+    void draw(Context &c)
     {
         c << _text;
     }
