@@ -10,16 +10,12 @@ namespace emgf
 class Container : public Widget
 {
 public:
-    static Container create()
-    {
-        return Container();
-    }
     Container() {}
     Container(Container const &c)
     {
         for (auto const &w : c.widgets)
         {
-            widgets.push_back(w->copy());
+            widgets.push_back(std::move(w->copy()));
         }
     }
 
