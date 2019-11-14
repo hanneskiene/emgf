@@ -16,16 +16,12 @@ int main()
     InputHandler handler;
     Context c;
 
-    std::vector<std::unique_ptr<Widget>> widgets =
-        {std::make_unique<Text>("HIII \n"),
-         std::make_unique<Text>("Line Two")};
-    /*
-    auto container = std::make_unique<Container>(
-        {std::make_unique<Text>("HIII \n"),
-         std::make_unique<Text>("Line Two")});
+    Widget w(
+        std::make_unique<Container>(
+            std::vector<Widget>{Widget(std::make_unique<Text>("HIII"))}));
 
-    container.draw(c);
-*/
+    w.draw(c);
+
     handler.loop_until('q');
 
     return 0;

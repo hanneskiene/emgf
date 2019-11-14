@@ -44,39 +44,38 @@ class Colored
     BackgroundColor _bgc;
 };
 
-class Widget
+class Drawable
 {
 public:
-    /*Widget() = 0;
-    Widget(Widget const &w) = 0; 
-    {
-        static_cast<void>(w);
-    }*/
-
-    virtual void draw(Context &c) = 0;          /*
-    {
-        static_cast<void>(c);
-    }*/
-    virtual std::unique_ptr<Widget> copy() = 0; /*
-    {
-        return std::make_unique<Widget>(*this);
-    }*/
+    virtual void draw(Context &c) = 0;
 };
 
-class Text : public Widget
+class Widget : public Drawable
+{
+public:
+    Widget() {}
+    Widget(std::unique_ptr<Drawable> d) : _content(std::move(d)) {}
+    void draw(Context &c) override
+    {
+        if (_content)
+        {
+            _content->draw(c);
+        }
+    }
+
+private:
+    std::unique_ptr<Drawable> _content;
+};
+
+class Text : public Drawable
 {
 public:
     Text(std::string t) : _text(t) {}
     Text(Text const &t) : _text(t._text) {}
 
-    void draw(Context &c)
+    void draw(Context &c) override
     {
         c << _text;
-    }
-
-    virtual std::unique_ptr<Widget> copy()
-    {
-        return std::make_unique<Text>(*this);
     }
 
     std::string _text;

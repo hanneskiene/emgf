@@ -7,19 +7,13 @@
 
 namespace emgf
 {
-class Container : public Widget
+class Container : public Drawable
 {
 public:
     Container() {}
-    Container(Container const &c)
-    {
-        for (auto const &w : c.widgets)
-        {
-            widgets.push_back(std::move(w->copy()));
-        }
-    }
+    Container(std::vector<Widget> w) : widgets(w) {}
 
-    Container &add_widget(std::unique_ptr<Widget> w)
+    Container &add_widget(Widget w)
     {
         widgets.push_back(std::move(w));
         return *this;
@@ -27,18 +21,13 @@ public:
 
     void draw(Context &c) override
     {
-        for (auto const &w : widgets)
+        for (auto &w : widgets)
         {
-            w->draw(c);
+            w.draw(c);
         }
     }
 
-    virtual std::unique_ptr<Widget> copy() override
-    {
-        return std::make_unique<Container>(*this);
-    }
-
-    std::vector<std::unique_ptr<Widget>> widgets;
+    std::vector<Widget> widgets;
 };
 
 } // namespace emgf
