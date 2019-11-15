@@ -10,36 +10,37 @@
 namespace emgf
 {
 
-class SizedBox : public Widget
+class SizedBox : public Drawable
 {
 public:
-    SizedBox(Size s) : Widget(s) {}
+    SizedBox(Size s) : Drawable(s) {}
 
     void draw_to(Context &c) override
     {
+        static_cast<void>(c);
     }
     void layout() override
     {
     }
 };
-class Padded : public Widget
+class Padded : public Drawable
 {
 public:
-    Padded(int amount) : _amount(amount) {}
+    Padded(int amount, Widget w) : _amount(amount), _child(w) {}
     void draw_to(Context &c) override
     {
-        _child->draw_to(c);
+        _child.draw_to(c);
     }
     void layout() override
     {
-        _child->_position = _position + Width(_amount) + Height(_amount);
-        _child->layout();
-        _size = _child->_size + Width(2 * _amount); // + Height(2 * _amount);
+        _child.position() = _position + Width(_amount) + Height(_amount);
+        _child.layout();
+        _size = _child.size() + Width(2 * _amount); // + Height(2 * _amount);
     }
-    std::shared_ptr<Widget> _child;
     int _amount;
+    Widget _child;
 };
-class Text : public Widget
+class Text : public Drawable
 {
 public:
     Text() : _text("") {}
@@ -64,34 +65,28 @@ public:
     std::string _text;
 };
 
-class Row : public Widget
+class Row : public Drawable
 {
 public:
-    Row() {}
-    Row(Position p) : Widget(p) {}
+    Row(std::vector<Widget> const &widgets) : _children(widgets) {}
     void draw_to(Context &c) override
     {
-        for (auto &w : _widgets)
+        for (auto &w : _children)
         {
-            w->draw_to(c);
+            w.draw_to(c);
         }
-    }
-
-    void add(std::shared_ptr<Widget> w)
-    {
-        _widgets.push_back(w);
     }
 
     void layout() override
     {
         auto temp_pos = _position;
-        for (auto &w : _widgets)
+        for (auto &w : _children)
         {
 
             // Update Child Positions
-            w->_position = temp_pos;
-            w->layout();
-            auto &other_size = w->_size;
+            w.position() = temp_pos;
+            w.layout();
+            auto &other_size = w.size();
             temp_pos += other_size.width;
             // Update own Size
             _size.width += other_size.width;
@@ -100,36 +95,30 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Widget>> _widgets;
+    std::vector<Widget> _children;
 };
 
-class Col : public Widget
+class Col : public Drawable
 {
 public:
-    Col() {}
-    Col(Position p) : Widget(p) {}
+    Col(std::vector<Widget> const &widgets) : _children(widgets) {}
     void draw_to(Context &c) override
     {
-        for (auto &w : _widgets)
+        for (auto &w : _children)
         {
-            w->draw_to(c);
+            w.draw_to(c);
         }
-    }
-
-    void add(std::shared_ptr<Widget> w)
-    {
-        _widgets.push_back(w);
     }
 
     void layout() override
     {
         auto temp_pos = _position;
-        for (auto &w : _widgets)
+        for (auto &w : _children)
         {
             // Update Child Positions
-            w->_position = temp_pos;
-            w->layout();
-            auto &other_size = w->_size;
+            w.position() = temp_pos;
+            w.layout();
+            auto &other_size = w.size();
             temp_pos += other_size.height;
             // Update own Size
             _size.height += other_size.height;
@@ -138,7 +127,7 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Widget>> _widgets;
+    std::vector<Widget> _children;
 };
 
 } // namespace emgf
