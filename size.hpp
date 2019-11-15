@@ -61,9 +61,30 @@ public:
         height += h;
         return *this;
     }
+    bool operator==(int sum)
+    {
+        return (sum == (width.value + height.value));
+    }
     Width width;
     Height height;
 };
+
+Size combine_max_sizes(Size first, Size second)
+{
+    if (!(first == 0) && !(second == 0))
+    {
+        return Size(Width(std::min(first.width.value, second.width.value)),
+                    Height(std::min(first.height.value, second.height.value)));
+    }
+    else if (first == 0)
+    {
+        return second;
+    }
+    else
+    {
+        return first;
+    }
+}
 
 Size operator+(Size s, Width w)
 {

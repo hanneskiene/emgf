@@ -13,16 +13,18 @@ using namespace emgf;
 std::vector<Widget> get_text()
 {
     std::vector<Widget> w;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 3; i++)
     {
-        w.push_back(Text("Line x"));
+        w.push_back(Text("Line 123456789abcdef"));
     }
     return w;
 }
 
 Widget get_col()
 {
-    return Padded(2, Col(get_text()));
+    return Padding(Padding::LTRB(5, 1, 0, 0),
+                   Sized(Size(Width(10), Height(20)),
+                         Col(get_text())));
 }
 
 int main()
@@ -33,7 +35,8 @@ int main()
     c << c_cmd::clear;
 
     Row w(
-        {get_col(),
+        {Sized(Size(Width(10), Height(1)), Text("123456789abcdef")),
+         get_col(),
          get_col()});
 
     w.layout();
