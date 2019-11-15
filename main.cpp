@@ -16,16 +16,19 @@ int main()
     InputHandler handler;
     Context c;
 
-    Page p;
-    p._header = "Hi";
+    Row r;
 
-    Column col;
-    col.position.down();
-    col._entries = {"First", "Second", "Third"};
+    r.add_new<Text>("HIIIII");
 
-    p._columns.push_back(col);
+    auto col = std::make_shared<Col>();
+    for (int i = 0; i < 10; i++)
+        col->add_new<Text>("First");
 
-    p.draw_to(c);
+    r.add(col);
+
+    r.layout();
+    c << c_cmd::clear;
+    r.draw_to(c);
     c.flush();
 
     handler.loop_until('q');

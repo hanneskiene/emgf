@@ -10,60 +10,118 @@
 namespace emgf
 {
 
-class Line
+class Text : public Widget
 {
 public:
-    Line() : _text("") {}
-    Line &operator=(std::string s)
+    Text() : _text("") {}
+    Text &operator=(std::string s)
     {
         _text = s;
         return *this;
     }
-    Line(std::string s) : _text(s) {}
-    void draw_to(Context &c)
+    Text(std::string s) : _text(s) {}
+
+    void draw_to(Context &c) override
     {
+        c << c_cmd::set_cursor(_position);
         c << _text;
+    }
+    void layout() override
+    {
+        _size.height = Height(1);
+        _size.width = Width(_text.size());
     }
 
     std::string _text;
 };
 
-class Column
+class Row : public Widget
 {
 public:
-    void draw_to(Context &c)
+    Row() {}
+    Row(Position p) : Widget(p) {}
+    void draw_to(Context &c) override
     {
-        auto temp_pos = position;
-        for (auto &s : _entries)
+        for (auto &w : _widgets)
         {
-            c << c_cmd::set_cursor(temp_pos)
-              << s;
-            temp_pos.down();
+            w->draw_to(c);
         }
     }
-    Position position;
-    std::vector<std::string> _entries;
-    int highlited = 0;
+
+    template <typename _T, typename... _Args>
+    void add_new(_Args &&... __args)
+    {
+        _widgets.push_back(std::make_shared<_T>(std::forward<_Args>(__args)...));
+    }
+
+    void add(std::shared_ptr<Widget> w)
+    {
+        _widgets.push_back(w);
+    }
+
+    void layout() override
+    {
+        auto temp_pos = _position;
+        for (auto &w : _widgets)
+        {
+
+            // Update Child Positions
+            w->_position = temp_pos;
+            w->layout();
+            auto &other_size = w->_size;
+            temp_pos += other_size.width;
+            // Update own Size
+            _size.width += other_size.width;
+            _size.height = std::max(other_size.height, _size.height);
+        }
+    }
+
+private:
+    std::vector<std::shared_ptr<Widget>> _widgets;
 };
 
-class Page
+class Col : public Widget
 {
 public:
-    Page() {}
-    void draw_to(Context &c)
+    Col() {}
+    Col(Position p) : Widget(p) {}
+    void draw_to(Context &c) override
     {
-        c << c_cmd::clear;
-        _header.draw_to(c);
-        for (auto &col : _columns)
+        for (auto &w : _widgets)
         {
-            col.draw_to(c);
+            w->draw_to(c);
         }
-        _footer.draw_to(c);
     }
 
-    Line _header;
-    std::vector<Column> _columns;
-    Line _footer;
+    template <typename _T, typename... _Args>
+    void add_new(_Args &&... __args)
+    {
+        _widgets.push_back(std::make_shared<_T>(std::forward<_Args>(__args)...));
+    }
+
+    void add(std::shared_ptr<Widget> w)
+    {
+        _widgets.push_back(w);
+    }
+
+    void layout() override
+    {
+        auto temp_pos = _position;
+        for (auto &w : _widgets)
+        {
+            // Update Child Positions
+            w->_position = temp_pos;
+            w->layout();
+            auto &other_size = w->_size;
+            temp_pos += other_size.height;
+            // Update own Size
+            _size.height += other_size.height;
+            _size.width = std::max(other_size.width, _size.width);
+        }
+    }
+
+private:
+    std::vector<std::shared_ptr<Widget>> _widgets;
 };
 
 } // namespace emgf
