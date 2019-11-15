@@ -64,4 +64,15 @@ public:
     Width width;
     Height height;
 };
+
+Size operator+(Size s, Width w)
+{
+    s += w;
+    return s;
+}
+Size operator+(Size s, Height h)
+{
+    s += h;
+    return s;
+}
 } // namespace emgf

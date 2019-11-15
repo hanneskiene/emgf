@@ -16,22 +16,33 @@ int main()
     InputHandler handler;
     Context c;
 
-    Row r;
+    auto r = std::make_shared<Col>();
 
-    r.add_new<Text>("HIIIII");
+    r->add(std::make_shared<Text>("HIIIII"));
+    r->add(std::make_shared<SizedBox>(Size(Width(20), Height(10))));
 
-    auto col = std::make_shared<Col>();
-    for (int i = 0; i < 10; i++)
-        col->add_new<Text>("First");
+    auto row = std::make_shared<Row>();
+    for (int z = 0; z < 4; z++)
+    {
+        auto col = std::make_shared<Col>();
+        for (int i = 0; i < 10; i++)
+        {
+            auto t = std::make_shared<Padded>(2);
+            t->_child = std::make_shared<Text>("First");
+            col->add(t);
+        }
+        row->add(col);
+    }
 
-    r.add(col);
+    r->add(row);
 
-    r.layout();
+    r->layout();
     c << c_cmd::clear;
-    r.draw_to(c);
+    r->draw_to(c);
     c.flush();
 
     handler.loop_until('q');
+    c << c_cmd::clear;
 
     return 0;
 }

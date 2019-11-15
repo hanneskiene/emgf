@@ -12,7 +12,10 @@ namespace emgf
 class Widget
 {
 public:
-    Widget(Position p = Position(), Size s = Size()) : _position(p), _size(s) {}
+    Widget() : _position(Position()), _size(Size()) {}
+    Widget(Position p) : _position(p), _size(Size()) {}
+    Widget(Size s) : _position(Position()), _size(s) {}
+    Widget(Position p, Size s) : _position(p), _size(s) {}
 
     virtual void draw_to(Context &c)
     {

@@ -10,6 +10,35 @@
 namespace emgf
 {
 
+class SizedBox : public Widget
+{
+public:
+    SizedBox(Size s) : Widget(s) {}
+
+    void draw_to(Context &c) override
+    {
+    }
+    void layout() override
+    {
+    }
+};
+class Padded : public Widget
+{
+public:
+    Padded(int amount) : _amount(amount) {}
+    void draw_to(Context &c) override
+    {
+        _child->draw_to(c);
+    }
+    void layout() override
+    {
+        _child->_position = _position + Width(_amount) + Height(_amount);
+        _child->layout();
+        _size = _child->_size + Width(2 * _amount); // + Height(2 * _amount);
+    }
+    std::shared_ptr<Widget> _child;
+    int _amount;
+};
 class Text : public Widget
 {
 public:
@@ -46,12 +75,6 @@ public:
         {
             w->draw_to(c);
         }
-    }
-
-    template <typename _T, typename... _Args>
-    void add_new(_Args &&... __args)
-    {
-        _widgets.push_back(std::make_shared<_T>(std::forward<_Args>(__args)...));
     }
 
     void add(std::shared_ptr<Widget> w)
@@ -91,12 +114,6 @@ public:
         {
             w->draw_to(c);
         }
-    }
-
-    template <typename _T, typename... _Args>
-    void add_new(_Args &&... __args)
-    {
-        _widgets.push_back(std::make_shared<_T>(std::forward<_Args>(__args)...));
     }
 
     void add(std::shared_ptr<Widget> w)

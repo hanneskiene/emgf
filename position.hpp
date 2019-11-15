@@ -32,4 +32,15 @@ public:
     int x;
     int y;
 };
+
+Position operator+(Position p, Width w)
+{
+    p += w;
+    return p;
+}
+Position operator+(Position p, Height h)
+{
+    p += h;
+    return p;
+}
 } // namespace emgf
