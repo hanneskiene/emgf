@@ -2,6 +2,8 @@
 
 namespace emgf
 {
+class Position;
+
 class Width
 {
 public:
@@ -46,6 +48,16 @@ bool operator>(Height first, Height second)
     return first.value > second.value;
 }
 
+Height operator+(Height first, Height second)
+{
+    return Height(first.value + second.value);
+}
+
+Height operator-(Height first, Height second)
+{
+    return Height(first.value - second.value);
+}
+
 bool operator<(Width first, Width second)
 {
     return first.value < second.value;
@@ -54,6 +66,16 @@ bool operator<(Width first, Width second)
 bool operator>(Width first, Width second)
 {
     return first.value > second.value;
+}
+
+Width operator+(Width first, Width second)
+{
+    return Width(first.value + second.value);
+}
+
+Width operator-(Width first, Width second)
+{
+    return Width(first.value - second.value);
 }
 
 class Size

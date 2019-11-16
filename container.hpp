@@ -27,22 +27,28 @@ public:
 class Sized : public Drawable
 {
 public:
-    Sized(Size s, Widget child) : Drawable(s), _child(child) {}
+    Sized(Size s, Widget child) : _fixed_size(s), _child(child) {}
     void draw_to(Context &c) override
     {
-        _child.draw_to(c);
+        if (_layed_out)
+        {
+            _child.draw_to(c);
+        }
     }
     Size get_preferred_size() override
     {
-        return _size;
+        return _fixed_size;
     }
     void layout()
     {
         _child.position() = _position;
         auto pref = _child.get_preferred_size();
-        _child.size() = min(_size, pref);
+        auto temp_min = min(_size, pref);
+        _child.size() = min(temp_min, _fixed_size);
         _child.layout();
+        _layed_out = true;
     }
+    Size _fixed_size;
     Widget _child;
 };
 
@@ -64,7 +70,10 @@ public:
 
     void draw_to(Context &c) override
     {
-        _child.draw_to(c);
+        if (_layed_out)
+        {
+            _child.draw_to(c);
+        }
     }
     Size get_preferred_size() override
     {
@@ -81,6 +90,7 @@ public:
         _child.position() = _position + Width(_amount._left) + Height(_amount._top);
         _child.size() = min(_size, _child.get_preferred_size());
         _child.layout();
+        _layed_out = true;
     }
     LTRB _amount;
     Widget _child;
@@ -99,14 +109,17 @@ public:
 
     void draw_to(Context &c) override
     {
-        c << c_cmd::set_cursor(_position);
-        if (_text.size() > _size.width.value && _size.width.value != 0)
+        if (_layed_out)
         {
-            c << _text.substr(0, _size.width.value);
-        }
-        else
-        {
-            c << _text;
+            c << c_cmd::set_cursor(_position);
+            if ((int)_text.size() > _size.width.value)
+            {
+                c << _text.substr(0, _size.width.value);
+            }
+            else
+            {
+                c << _text;
+            }
         }
     }
     Size get_preferred_size() override
@@ -115,6 +128,7 @@ public:
     }
     void layout() override
     {
+        _layed_out = true;
     }
 
     std::string _text;
@@ -126,9 +140,12 @@ public:
     Row(std::vector<Widget> const &widgets) : _children(widgets) {}
     void draw_to(Context &c) override
     {
-        for (auto &w : _children)
+        if (_layed_out)
         {
-            w.draw_to(c);
+            for (auto &w : _children)
+            {
+                w.draw_to(c);
+            }
         }
     }
     Size get_preferred_size() override
@@ -149,18 +166,25 @@ public:
         auto temp_pos = _position;
         for (auto &w : _children)
         {
+            w.layed_out() = false;
             auto pref = w.get_preferred_size();
-            // Update Child Positions
-            w.position() = temp_pos;
-            w.size() = Size(pref.width, std::min(_size.height, pref.height));
-            w.layout();
-            auto &other_size = w.size();
-            temp_pos += other_size.width;
             if (further_right(temp_pos, _position + _size))
             {
-                return;
+                break;
             }
+            // Update Child Positions
+            w.position() = temp_pos;
+            auto child_width = pref.width;
+            if (further_right(temp_pos + pref.width, _position + _size))
+            {
+                child_width = to_width(_position + _size) - to_width(temp_pos);
+            }
+            w.size() = Size(child_width, std::min(_size.height, pref.height));
+            w.layout();
+
+            temp_pos += w.size().width;
         }
+        _layed_out = true;
     }
 
 private:
@@ -173,9 +197,12 @@ public:
     Col(std::vector<Widget> const &widgets) : _children(widgets) {}
     void draw_to(Context &c) override
     {
-        for (auto &w : _children)
+        if (_layed_out)
         {
-            w.draw_to(c);
+            for (auto &w : _children)
+            {
+                w.draw_to(c);
+            }
         }
     }
 
@@ -197,18 +224,24 @@ public:
         auto temp_pos = _position;
         for (auto &w : _children)
         {
+            w.layed_out() = false;
             auto pref = w.get_preferred_size();
-            // Update Child Positions
-            w.position() = temp_pos;
-            w.size() = Size(std::min(_size.width, pref.width), pref.height);
-            w.layout();
-            auto &other_size = w.size();
-            temp_pos += other_size.height;
             if (further_down(temp_pos, _position + _size))
             {
-                return;
+                break;
             }
+            // Update Child Positions
+            w.position() = temp_pos;
+            auto child_height = pref.height;
+            if (further_down(temp_pos + pref.height, _position + _size))
+            {
+                child_height = to_height(_position + _size) - to_height(temp_pos);
+            }
+            w.size() = Size(std::min(_size.width, pref.width), child_height);
+            w.layout();
+            temp_pos += w.size().height;
         }
+        _layed_out = true;
     }
 
 private:

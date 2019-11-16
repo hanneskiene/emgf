@@ -28,6 +28,7 @@ public:
 
     Position _position = Position(0, 0);
     Size _size = Size(Width(0), Height(0));
+    bool _layed_out = false;
 };
 
 class Widget
@@ -56,6 +57,10 @@ public:
     Size get_preferred_size()
     {
         return _ptr->get_preferred_size();
+    }
+    bool &layed_out()
+    {
+        return _ptr->_layed_out;
     }
 
     std::shared_ptr<Drawable> _ptr;

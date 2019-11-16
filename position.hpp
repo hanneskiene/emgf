@@ -58,4 +58,14 @@ Position operator+(Position p, Size s)
     p += s;
     return p;
 }
+
+Width to_width(Position p)
+{
+    return Width(p.y);
+}
+
+Height to_height(Position p)
+{
+    return Height(p.x);
+}
 } // namespace emgf

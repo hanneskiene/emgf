@@ -34,12 +34,13 @@ int main()
     Context c;
     c << c_cmd::clear;
 
-    Sized w(Sized(Size(Width(10), Height(1)),
-                  Row(
-                      {Sized(Size(Width(10), Height(1)), Text("123456789abcdef")),
-                       get_col(),
-                       get_col()})));
-
+    Sized w(Size(Width(28), Height(10)),
+            Row(
+                {Sized(Size(Width(10), Height(1)), Text("123456789abcdef")),
+                 get_col(),
+                 get_col(),
+                 get_col()}));
+    w._size = Size(100, 100); // Simulate top level
     w.layout();
     w.draw_to(c);
     c.flush();
