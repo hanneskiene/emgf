@@ -15,8 +15,8 @@ class Drawable
 public:
     Drawable() {}
     Drawable(Position p) : _position(p) {}
-    Drawable(Size max) : _max_size(max) {}
-    Drawable(Position p, Size max) : _position(p), _max_size(max) {}
+    Drawable(Size s) : _size(s) {}
+    Drawable(Position p, Size s) : _position(p), _size(s) {}
 
     virtual void draw_to(Context &c)
     {
@@ -24,14 +24,10 @@ public:
     }
     virtual void layout() {}
 
-    virtual bool has_max_size()
-    {
-        return (_max_size.width.value != 0 && _max_size.height.value != 0);
-    }
+    virtual Size get_preferred_size() { return Size(); }
 
     Position _position = Position(0, 0);
     Size _size = Size(Width(0), Height(0));
-    Size _max_size = Size(Width(0), Height(0));
 };
 
 class Widget
@@ -57,14 +53,11 @@ public:
     {
         return _ptr->_size;
     }
-    Size &max_size()
+    Size get_preferred_size()
     {
-        return _ptr->_max_size;
+        return _ptr->get_preferred_size();
     }
-    bool has_max_size()
-    {
-        return (_ptr->_max_size) == 0;
-    }
+
     std::shared_ptr<Drawable> _ptr;
 };
 } // namespace emgf

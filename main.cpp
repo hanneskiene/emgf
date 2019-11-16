@@ -15,7 +15,7 @@ std::vector<Widget> get_text()
     std::vector<Widget> w;
     for (int i = 0; i < 3; i++)
     {
-        w.push_back(Text("Line 123456789abcdef"));
+        w.push_back(Text("TestLineABC"));
     }
     return w;
 }
@@ -34,10 +34,11 @@ int main()
     Context c;
     c << c_cmd::clear;
 
-    Row w(
-        {Sized(Size(Width(10), Height(1)), Text("123456789abcdef")),
-         get_col(),
-         get_col()});
+    Sized w(Sized(Size(Width(10), Height(1)),
+                  Row(
+                      {Sized(Size(Width(10), Height(1)), Text("123456789abcdef")),
+                       get_col(),
+                       get_col()})));
 
     w.layout();
     w.draw_to(c);

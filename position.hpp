@@ -34,6 +34,15 @@ public:
     int y;
 };
 
+bool further_down(Position first, Position second)
+{
+    return first.x > second.x;
+}
+bool further_right(Position first, Position second)
+{
+    return first.y > second.y;
+}
+
 Position operator+(Position p, Width w)
 {
     p += w;
@@ -42,6 +51,11 @@ Position operator+(Position p, Width w)
 Position operator+(Position p, Height h)
 {
     p += h;
+    return p;
+}
+Position operator+(Position p, Size s)
+{
+    p += s;
     return p;
 }
 } // namespace emgf

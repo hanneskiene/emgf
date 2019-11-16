@@ -11,6 +11,11 @@ public:
         value += w.value;
         return *this;
     }
+    Width &operator-=(Width w)
+    {
+        value -= w.value;
+        return *this;
+    }
     int value = 0;
 };
 
@@ -21,6 +26,11 @@ public:
     Height &operator+=(Height h)
     {
         value += h.value;
+        return *this;
+    }
+    Height &operator-=(Height h)
+    {
+        value -= h.value;
         return *this;
     }
     int value = 0;
@@ -61,6 +71,16 @@ public:
         height += h;
         return *this;
     }
+    Size &operator-=(Width w)
+    {
+        width -= w;
+        return *this;
+    }
+    Size &operator-=(Height h)
+    {
+        height -= h;
+        return *this;
+    }
     bool operator==(int sum)
     {
         return (sum == (width.value + height.value));
@@ -69,21 +89,28 @@ public:
     Height height;
 };
 
-Size combine_max_sizes(Size first, Size second)
+Size max(Size first, Size second)
 {
-    if (!(first == 0) && !(second == 0))
-    {
-        return Size(Width(std::min(first.width.value, second.width.value)),
-                    Height(std::min(first.height.value, second.height.value)));
-    }
-    else if (first == 0)
-    {
-        return second;
-    }
-    else
-    {
-        return first;
-    }
+    return Size(std::max(first.width, second.width),
+                std::max(first.height, second.height));
+}
+
+Size max_width(Size first, Size second)
+{
+    return Size(std::max(first.width, second.width),
+                std::min(first.height, second.height));
+}
+
+Size min(Size first, Size second)
+{
+    return Size(std::min(first.width, second.width),
+                std::min(first.height, second.height));
+}
+
+Size max_height(Size first, Size second)
+{
+    return Size(std::min(first.width, second.width),
+                std::max(first.height, second.height));
 }
 
 Size operator+(Size s, Width w)
@@ -94,6 +121,16 @@ Size operator+(Size s, Width w)
 Size operator+(Size s, Height h)
 {
     s += h;
+    return s;
+}
+Size operator-(Size s, Width w)
+{
+    s -= w;
+    return s;
+}
+Size operator-(Size s, Height h)
+{
+    s -= h;
     return s;
 }
 } // namespace emgf

@@ -21,7 +21,6 @@ public:
     }
     void layout() override
     {
-        _size = _max_size;
     }
 };
 
@@ -33,13 +32,16 @@ public:
     {
         _child.draw_to(c);
     }
+    Size get_preferred_size() override
+    {
+        return _size;
+    }
     void layout()
     {
         _child.position() = _position;
-        _child.max_size() = combine_max_sizes(_max_size, _child.max_size());
-
+        auto pref = _child.get_preferred_size();
+        _child.size() = min(_size, pref);
         _child.layout();
-        _size = _max_size;
     }
     Widget _child;
 };
@@ -59,20 +61,26 @@ public:
         int _bottom;
     };
     Padding(LTRB amount, Widget w) : _amount(amount), _child(w) {}
+
     void draw_to(Context &c) override
     {
         _child.draw_to(c);
     }
+    Size get_preferred_size() override
+    {
+        auto pref = _child.get_preferred_size();
+        auto padded_pref = pref +
+                           Width(_amount._left) +
+                           Width(_amount._right) +
+                           Height(_amount._top) +
+                           Height(_amount._bottom);
+        return padded_pref;
+    }
     void layout() override
     {
         _child.position() = _position + Width(_amount._left) + Height(_amount._top);
-        _child.max_size() = combine_max_sizes(_max_size, _child.max_size());
+        _child.size() = min(_size, _child.get_preferred_size());
         _child.layout();
-        _size = _child.size() +
-                Width(_amount._left) +
-                Width(_amount._right) +
-                Height(_amount._top) +
-                Height(_amount._bottom);
     }
     LTRB _amount;
     Widget _child;
@@ -92,7 +100,7 @@ public:
     void draw_to(Context &c) override
     {
         c << c_cmd::set_cursor(_position);
-        if (_text.size() > _size.width.value)
+        if (_text.size() > _size.width.value && _size.width.value != 0)
         {
             c << _text.substr(0, _size.width.value);
         }
@@ -101,17 +109,12 @@ public:
             c << _text;
         }
     }
+    Size get_preferred_size() override
+    {
+        return Size(Width(_text.size()), Height(1));
+    }
     void layout() override
     {
-        if (_max_size == 0)
-        {
-            _size.height = Height(1);
-            _size.width = _text.size();
-        }
-        else
-        {
-            _size = _max_size;
-        }
     }
 
     std::string _text;
@@ -128,21 +131,35 @@ public:
             w.draw_to(c);
         }
     }
+    Size get_preferred_size() override
+    {
+        Width width_sum(0);
+        Height height_max(0);
+        for (auto &w : _children)
+        {
+            auto pref = w.get_preferred_size();
+            width_sum += pref.width;
+            height_max = std::max(height_max, pref.height);
+        }
+        return Size(width_sum, height_max);
+    }
 
     void layout() override
     {
         auto temp_pos = _position;
         for (auto &w : _children)
         {
+            auto pref = w.get_preferred_size();
             // Update Child Positions
             w.position() = temp_pos;
-            w.max_size().height = (_max_size.height.value == 0) ? w.max_size().height : _max_size.height;
+            w.size() = Size(pref.width, std::min(_size.height, pref.height));
             w.layout();
             auto &other_size = w.size();
             temp_pos += other_size.width;
-            // Update own Size
-            _size.width += other_size.width;
-            _size.height = std::max(other_size.height, _size.height);
+            if (further_right(temp_pos, _position + _size))
+            {
+                return;
+            }
         }
     }
 
@@ -162,20 +179,35 @@ public:
         }
     }
 
+    Size get_preferred_size() override
+    {
+        Width width_max(0);
+        Height height_sum(0);
+        for (auto &w : _children)
+        {
+            auto pref = w.get_preferred_size();
+            width_max = std::max(width_max, pref.width);
+            height_sum += pref.height;
+        }
+        return Size(width_max, height_sum);
+    }
+
     void layout() override
     {
         auto temp_pos = _position;
         for (auto &w : _children)
         {
+            auto pref = w.get_preferred_size();
             // Update Child Positions
             w.position() = temp_pos;
-            w.max_size().width = (_max_size.width.value == 0) ? w.max_size().width : _max_size.width.value;
+            w.size() = Size(std::min(_size.width, pref.width), pref.height);
             w.layout();
             auto &other_size = w.size();
             temp_pos += other_size.height;
-            // Update own Size
-            _size.height += other_size.height;
-            _size.width = std::max(other_size.width, _size.width);
+            if (further_down(temp_pos, _position + _size))
+            {
+                return;
+            }
         }
     }
 
